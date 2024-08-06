@@ -1,9 +1,7 @@
 import { FormGroup } from "./FormGroup"
 import ReactSelect from "react-select"
-import { useRef, useState } from "react"
 import "./styles.css"
-// import { checkCountry, checkEmail, checkPassword } from "./validators"
-import { useForm } from "react-hook-form"
+import { useController, useForm } from "react-hook-form"
 
 
 const COUNTRY_OPTIONS = [
@@ -16,21 +14,22 @@ function App() {
   const {
     register, 
     handleSubmit, 
-    formState: { errors }}
+    formState: { errors },
+    control
+
+  }
     = useForm()
     
-  const countryRef = useRef()
- 
-  const [countryErrors, setCountryErrors] = useState([])
-
-  function onSubmit(data) {   
-    setCountryErrors(countryResults)
-      countryResults.length === 0
-      alert("Success")
-      
-    }
+    const {field: countryField } = useController({
+      name: "country", 
+      control,
+      rules: {required: {value: true, message: "required"}}
+    })
   
-
+  function onSubmit() {   
+      alert("Success")
+    }
+    
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="form">
 
@@ -64,7 +63,7 @@ function App() {
           id="password"
           {...register("password", { 
             required: {value: true, message:"Required"}, 
-            minLength: {value: 10, message: " Must be at least 10 characters"},
+             minLength: {value: 3, message: " Must be at least 10 characters"},
             validate: { 
               hasLowerCase: value => {
                 if (!value.match(/[a-z]/)){
@@ -77,21 +76,18 @@ function App() {
                   return "Must include atleast 1 Uppercase letter"
                 }
               },
-
-              hasNumber: value => {
-                if (!value.match([/0-9/])){
-                  return "Must include atleast 1 number"
-                }
-              }
+              // hasNumber: value => {
+              //   if (!value.match([/0-9/])){
+              //     return "Must include atleast 1 number"
+              //   }
+              // }
              }
     })}        
-        
         />
       </FormGroup>
 
-
       {/* country input */}
-      <FormGroup errors={countryErrors}>
+      <FormGroup errorMessage={errors?.country?.message}>
         <label className="label" htmlFor="country">
           Country
         </label>
@@ -100,8 +96,8 @@ function App() {
           isClearable
           classNamePrefix="react-select"
           id="country"
-          ref={countryRef}
           options={COUNTRY_OPTIONS}
+          {...countryField}
         />
       </FormGroup>
 
